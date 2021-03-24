@@ -3,8 +3,11 @@
 namespace App;
 
 use App\Command\GetVideoDurationCommand;
+use App\Command\GetVideoInfoCommand;
 use App\Command\GetVideoUrlCommand;
 use App\Command\MoveVideoToFolderCommand;
+use App\Command\ReportCompletedCommand;
+use App\Command\ReportStartedCommand;
 use App\Command\UploadVideoCommand;
 use Pimple\Container;
 use Symfony\Component\Console\Application;
@@ -42,6 +45,8 @@ class App {
     $this->application->add(new GetVideoDurationCommand($this->container));
     $this->application->add(new MoveVideoToFolderCommand($this->container));
     $this->application->add(new UploadVideoCommand($this->container));
+    $this->application->add(new ReportStartedCommand($this->container));
+    $this->application->add(new ReportCompletedCommand($this->container));
 
     $this->vimeo = $this->container['vimeo.client'];
   }
