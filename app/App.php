@@ -2,11 +2,14 @@
 
 namespace App;
 
+use App\Command\GetMyVideosCommand;
 use App\Command\GetVideoDurationCommand;
 use App\Command\GetVideoInfoCommand;
 use App\Command\GetVideoUrlCommand;
 use App\Command\MoveVideoToFolderCommand;
 use App\Command\ReportCompletedCommand;
+use App\Command\ReportFailureCommand;
+use App\Command\ReportProgressCommand;
 use App\Command\ReportStartedCommand;
 use App\Command\UploadVideoCommand;
 use Pimple\Container;
@@ -42,11 +45,15 @@ class App {
 
     $this->application = new Application();
     $this->application->add(new GetVideoUrlCommand($this->container));
+    $this->application->add(new GetVideoInfoCommand($this->container));
+    $this->application->add(new GetMyVideosCommand($this->container));
     $this->application->add(new GetVideoDurationCommand($this->container));
     $this->application->add(new MoveVideoToFolderCommand($this->container));
     $this->application->add(new UploadVideoCommand($this->container));
     $this->application->add(new ReportStartedCommand($this->container));
+    $this->application->add(new ReportProgressCommand($this->container));
     $this->application->add(new ReportCompletedCommand($this->container));
+    $this->application->add(new ReportFailureCommand($this->container));
 
     $this->vimeo = $this->container['vimeo.client'];
   }

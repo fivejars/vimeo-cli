@@ -39,15 +39,17 @@ class ReportStartedCommand extends Command {
 
     $uri = getenv('CALLBACK_URL');
     $data = [
+      'token' => getenv('AUTH_TOKEN'),
       'eventinstance_id' => getenv('EVENT_INSTANCE_ID'),
       'status' => 'started',
       'details' => [],
     ];
 
-    $response = $client->post($uri, [
-      'auth' => ['fivejars', 'fivejars'],
-      'json' => $data,
-    ]);
+    $options = [ 'json' => $data ];
+    if (getenv('AUTH_USER') || getenv('AUTH_PASS')) {
+      $options['auth'] = [getenv('AUTH_USER'), getenv('AUTH_PASS')];
+    }
+    $client->post($uri, $options);
 
     return Command::SUCCESS;
   }
