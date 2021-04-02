@@ -42,7 +42,7 @@ class ReportProgressCommand extends Command {
       'token' => getenv('AUTH_TOKEN'),
       'eventinstance_id' => getenv('EVENT_INSTANCE_ID'),
       'status' => 'progress',
-      'details' => [],
+      'details' => getenv('PROGRESS_DETAILS'),
     ];
 
     $options = [ 'json' => $data ];

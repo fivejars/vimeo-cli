@@ -42,9 +42,7 @@ class ReportFailureCommand extends Command {
       'token' => getenv('AUTH_TOKEN'),
       'eventinstance_id' => getenv('EVENT_INSTANCE_ID'),
       'status' => 'failure',
-      'details' => [
-        'reason' => getenv('FAILURE_REASON'),
-      ],
+      'details' => getenv('FAILURE_REASON'),
     ];
 
     $options = [ 'json' => $data ];
