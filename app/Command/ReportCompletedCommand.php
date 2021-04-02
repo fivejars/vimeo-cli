@@ -44,7 +44,7 @@ class ReportCompletedCommand extends Command {
     $data = [
       'token' => getenv('AUTH_TOKEN'),
       'eventinstance_id' => getenv('EVENT_INSTANCE_ID'),
-      'status' => 'started',
+      'status' => 'completed',
       'details' => [
         'videoId' => $input->getArgument('video_id'),
         'videoName' => getenv('VIDEO_NAME'),
