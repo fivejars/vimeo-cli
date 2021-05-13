@@ -14,7 +14,7 @@ class ReportCompletedCommand extends Command {
   protected static $defaultName = 'report:completed';
 
   /**
-   * GetVideoUrlCommand constructor.
+   * ReportCompletedCommand constructor.
    *
    * @param \Pimple\Container $container
    */
@@ -39,6 +39,8 @@ class ReportCompletedCommand extends Command {
    */
   protected function execute(InputInterface $input, OutputInterface $output) {
     $client = new Client();
+    $video_id = $input->getArgument('video_id');
+    $this->waitForProcessing($video_id, intval(getenv('DURATION')));
 
     $uri = getenv('CALLBACK_URL');
     $data = [
@@ -46,7 +48,7 @@ class ReportCompletedCommand extends Command {
       'eventinstance_id' => getenv('EVENT_INSTANCE_ID'),
       'status' => 'completed',
       'details' => [
-        'videoId' => $input->getArgument('video_id'),
+        'videoId' => $video_id,
         'videoName' => getenv('VIDEO_NAME'),
         'hostName' => getenv('VY_HOST_NAME'),
         'categories' => json_decode(getenv('VY_CATEGORIES')),
@@ -60,8 +62,48 @@ class ReportCompletedCommand extends Command {
     if (getenv('AUTH_USER') || getenv('AUTH_PASS')) {
       $options['auth'] = [getenv('AUTH_USER'), getenv('AUTH_PASS')];
     }
-    $response = $client->post($uri, $options);
+    $client->post($uri, $options);
 
     return Command::SUCCESS;
   }
+
+  /**
+   * Waits for the video to be processed on the Vimeo side.
+   *
+   * @param int $video_id
+   *   The ID of a Vimeo video.
+   * @param int $timeout
+   *   The timeout in seconds.
+   */
+  private function waitForProcessing($video_id, $timeout) {
+    $start = microtime(TRUE);
+    while (!$this->verifyOembed($video_id)) {
+      // Do not spend more than $timeout seconds.
+      if (microtime(TRUE) - $start >= $timeout) {
+        break;
+      }
+      sleep(60);
+    }
+  }
+
+  /**
+   * Verifies that Vimeo oembed endpoint returns value.
+   *
+   * @param int $video_id
+   *   The ID of a Vimeo video.
+   *
+   * @return bool
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   */
+  private function verifyOembed($video_id) {
+    $client = new Client();
+    $url = 'https://vimeo.com/' . $video_id;
+    $response = $client->get('https://vimeo.com/api/oembed.json', [
+      'query' => ['url' => $url],
+      'http_errors' => FALSE,
+      'timeout' => 10,
+    ]);
+    return $response->getStatusCode() == 200;
+  }
+
 }
