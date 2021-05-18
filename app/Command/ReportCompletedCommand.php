@@ -52,6 +52,7 @@ class ReportCompletedCommand extends Command {
       'details' => [
         'videoId' => $video_id,
         'videoName' => getenv('VIDEO_NAME'),
+        'videoDate' => getenv('EVENT_DATE'),
         'hostName' => getenv('VY_HOST_NAME'),
         'categories' => json_decode(getenv('VY_CATEGORIES')),
         'equipment' => json_decode(getenv('VY_EQUIPMENT')),
