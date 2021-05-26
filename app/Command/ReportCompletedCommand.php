@@ -53,6 +53,8 @@ class ReportCompletedCommand extends Command {
         'videoId' => $video_id,
         'videoName' => getenv('VIDEO_NAME'),
         'videoDate' => getenv('EVENT_DATE'),
+        'thumbnailType' => getenv('THUMBNAIL_TYPE'),
+        'thumbnailUrl' => $this->getThumbnailUrl(),
         'hostName' => getenv('VY_HOST_NAME'),
         'categories' => json_decode(getenv('VY_CATEGORIES')),
         'equipment' => json_decode(getenv('VY_EQUIPMENT')),
@@ -68,6 +70,26 @@ class ReportCompletedCommand extends Command {
     $client->post($uri, $options);
 
     return Command::SUCCESS;
+  }
+
+  /**
+   * Returns the thumbnail URL.
+   *
+   * @return mixed
+   *   The thumbnail URL or false.
+   */
+  private function getThumbnailUrl() {
+    switch (getenv('THUMBNAIL_TYPE')) {
+      case 'generate':
+      case 'vimeo':
+        $result = getenv('THUMBNAIL_URL') ?: FALSE;
+        break;
+
+      default:
+        $result = FALSE;
+        break;
+    }
+    return $result;
   }
 
   /**
@@ -114,7 +136,7 @@ class ReportCompletedCommand extends Command {
   private function getVideoOembedResponse($video_id): ResponseInterface {
     $client = new Client();
     $url = 'https://vimeo.com/' . $video_id;
-    return $client->request('get', static::$vimeoOembedEndpoint, [
+    return $client->request('GET', static::$vimeoOembedEndpoint, [
       'query' => ['url' => $url],
       'http_errors' => FALSE,
       'timeout' => 10,
