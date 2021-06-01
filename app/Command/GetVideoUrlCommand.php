@@ -58,7 +58,7 @@ class GetVideoUrlCommand extends Command {
       return Command::FAILURE;
     }
 
-    $video_file = array_filter($response['body']['files'], function ($e) {
+    $video_file = array_filter($response['body']['download'], function ($e) {
       return in_array($e['public_name'], ['HD 1080p', 'Live 1080p']);
     });
 
