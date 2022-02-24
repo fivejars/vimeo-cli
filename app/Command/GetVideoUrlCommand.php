@@ -59,7 +59,7 @@ class GetVideoUrlCommand extends Command {
     }
 
     $video_file = array_filter($response['body']['download'], function ($e) {
-      return in_array($e['public_name'], ['HD 1080p', 'Live 1080p']);
+      return $e['type'] == 'video/mp4' && $e['height'] == 1080;
     });
 
     if (!$video_file) {
