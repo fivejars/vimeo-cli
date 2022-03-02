@@ -16,6 +16,13 @@ class ReportCompletedCommand extends Command {
   protected static $vimeoOembedEndpoint = 'https://vimeo.com/api/oembed.json';
 
   /**
+   * The OEmbed data.
+   *
+   * @var mixed $oEmbedData
+   */
+  private $oEmbedData = NULL;
+
+  /**
    * ReportCompletedCommand constructor.
    *
    * @param \Pimple\Container $container
@@ -59,7 +66,7 @@ class ReportCompletedCommand extends Command {
         'categories' => json_decode(getenv('VY_CATEGORIES')),
         'equipment' => json_decode(getenv('VY_EQUIPMENT')),
         'level' => getenv('VY_LEVEL'),
-        'duration' => $this->getVideoOembedData($video_id)['duration'],
+        'duration' => $this->oEmbedData['duration'],
       ],
     ];
 
@@ -102,26 +109,13 @@ class ReportCompletedCommand extends Command {
    */
   private function waitForProcessing($video_id, $timeout = 7200) {
     $start = microtime(TRUE);
-    while (!$this->verifyOembed($video_id)) {
+    while (!$this->getVideoOembedData($video_id)) {
       // Do not spend more than $timeout seconds.
       if (microtime(TRUE) - $start >= $timeout) {
         break;
       }
       sleep(60);
     }
-  }
-
-  /**
-   * Verifies that Vimeo oembed endpoint returns value.
-   *
-   * @param int $video_id
-   *   The ID of a Vimeo video.
-   *
-   * @return bool
-   */
-  private function verifyOembed($video_id) {
-    $response = $this->getVideoOembedResponse($video_id);
-    return $response->getStatusCode() == 200;
   }
 
   /**
@@ -149,12 +143,22 @@ class ReportCompletedCommand extends Command {
    * @param int $video_id
    *   The ID od a Vimeo video.
    *
-   * @return array
-   *   The response array.
+   * @return mixed
+   *   The response array or NULL.
    */
-  private function getVideoOembedData($video_id): array {
-    $response = $this->getVideoOembedResponse($video_id);
-    return json_decode($response->getBody()->getContents(), TRUE);
+  private function getVideoOembedData($video_id) {
+    if (!$this->oEmbedData) {
+      $response = $this->getVideoOembedResponse($video_id);
+      if ($response->getStatusCode() != 200) {
+        return NULL;
+      }
+      if (!$content = json_decode($response->getBody()->getContents(), TRUE)) {
+        return NULL;
+      }
+      $this->oEmbedData = $content;
+    }
+
+    return $this->oEmbedData;
   }
 
 }
